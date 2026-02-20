@@ -1,0 +1,36 @@
+{
+  "short_name": "Taxi Identification",
+  "name": "Taxi Identification ",
+  "id": "/",
+  "icons": [
+    {
+      "src": "/assets/icons/cuy-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/CUY.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/icons/CUY.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/chinda-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/?utm_source=web_app_manifest",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#024A59",
+  "scope": "/"
+}

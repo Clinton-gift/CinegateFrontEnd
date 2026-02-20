@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- ✅ Accessibility-friendly viewport (no user-scalable=no) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ✅ Nice address-bar / PWA color on supported browsers -->
+  <meta name="theme-color" content="#024A59" />
+
+  <!-- ✅ PWA manifest -->
+  <link rel="manifest" href="/app.webmanifest" />
+
+  <!-- ✅ Favicon -->
+  <link rel="icon" href="/assets/icons/chinda-192.png" />
+
+  <!-- ✅ iOS “Add to Home Screen” icon (you can use your existing icon) -->
+  <link rel="apple-touch-icon" href="/assets/icons/chinda-192.png" />
+
+  <title>Taxi Identification</title>
+
+  <style>
+    html, body, #root {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/service-worker.js").catch(function (err) {
+          console.warn("SW registration failed", err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

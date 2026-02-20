@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Taxi Identification",
+    "slug": "Taxi Identification",
+    "icon": "./assets/icons/CUY.png",
+    "web": {
+      "bundler": "webpack",
+      "favicon": "./assets/icons/yellowtaxi.png",
+      "name": "Taxi Identification",
+      "shortName": "Taxi Identification",
+      "display": "standalone",
+      "themeColor": "#024A59",
+      "backgroundColor": "#ffffff",
+      "startUrl": ".",
+      "scope": "/"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos",
+          "cameraPermission": "The app accesses your camera to let you take photos of your documents."
+        }
+      ],
+      "expo-font"
+    ]
+  }
+}

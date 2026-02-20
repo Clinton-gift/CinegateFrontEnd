@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  userapp:
+    build: .
+    ports:
+      - "19007:8080"
+    restart: unless-stopped
