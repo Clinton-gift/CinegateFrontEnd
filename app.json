@@ -1,18 +1,21 @@
 {
   "expo": {
     "name": "Taxi Identification",
-    "slug": "Taxi Identification",
+    "slug": "taxi-identification",
     "icon": "./assets/icons/CUY.png",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "web": {
-      "bundler": "webpack",
+      "bundler": "metro",
       "favicon": "./assets/icons/yellowtaxi.png",
       "name": "Taxi Identification",
       "shortName": "Taxi Identification",
       "display": "standalone",
       "themeColor": "#024A59",
-      "backgroundColor": "#ffffff",
-      "startUrl": ".",
-      "scope": "/"
+      "backgroundColor": "#ffffff"
     },
     "plugins": [
       [
@@ -22,7 +25,8 @@
           "cameraPermission": "The app accesses your camera to let you take photos of your documents."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ]
   }
 }

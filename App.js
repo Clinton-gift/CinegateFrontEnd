@@ -1,6 +1,7 @@
-// ✅ UPDATED App.js — CineBridge Frontend (keeps PWA prompt + fonts + i18n)
-// - Removes TaxiIdent navigation + deep-linking
-// - Renders CineBridgeLandingPage directly
+// App.js — CineBridge Frontend (Expo SDK 51 compatible)
+// ✅ Web: render in a real <div> so scrolling/layout works normally
+// ✅ Native: keep <View>
+// ✅ Keeps PWA install prompt + fonts + i18n
 
 import React, { useEffect, useRef, useState, createContext } from "react";
 import {
@@ -25,7 +26,7 @@ import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 
 import "./src/global.css";
 
-// ✅ i18n provider (keep if you want language switch)
+// ✅ i18n provider
 import { LanguageProvider } from "./src/i18n";
 
 // ✅ CineBridge page
@@ -73,7 +74,9 @@ const Button = ({ title, onPress, variant = "primary", style }) => {
 function InstallPrompt({ visible, onClose, deferredEvent }) {
   const isIOS =
     Platform.OS === "ios" ||
-    (Platform.OS === "web" && /iPad|iPhone|iPod/.test(navigator.userAgent));
+    (Platform.OS === "web" &&
+      typeof navigator !== "undefined" &&
+      /iPad|iPhone|iPod/.test(navigator.userAgent));
 
   const canPrompt = !!deferredEvent;
 
@@ -82,7 +85,6 @@ function InstallPrompt({ visible, onClose, deferredEvent }) {
       <View style={styles.modalBackdrop}>
         <View style={styles.modalSheet}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            {/* ✅ Replace icon later with CineBridge logo if you want */}
             <Image
               source={require("./assets/icons/vidicon.png")}
               style={{ width: 35, height: 35, borderRadius: 6 }}
@@ -132,35 +134,38 @@ export default function App() {
     Montserrat_700Bold,
   });
 
-  // ✅ Keep PWA install prompt behavior
+  // ✅ PWA install prompt behavior (web only)
   const [showPrompt, setShowPrompt] = useState(false);
   const deferredPromptRef = useRef(null);
 
   useEffect(() => {
-    if (Platform.OS === "web") {
-      const isStandalone =
-        window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    if (Platform.OS !== "web") return;
 
-      let timer;
+    const isStandalone =
+      (typeof window !== "undefined" &&
+        window.matchMedia &&
+        window.matchMedia("(display-mode: standalone)").matches) ||
+      (typeof navigator !== "undefined" && navigator.standalone === true);
 
-      const onBIP = (e) => {
-        e.preventDefault();
-        deferredPromptRef.current = e;
-        if (!isStandalone) setShowPrompt(true);
-      };
+    let timer;
 
-      const showSoon = () => {
-        if (!isStandalone) setShowPrompt(true);
-      };
+    const onBIP = (e) => {
+      e.preventDefault();
+      deferredPromptRef.current = e;
+      if (!isStandalone) setShowPrompt(true);
+    };
 
-      window.addEventListener("beforeinstallprompt", onBIP);
-      timer = setTimeout(showSoon, 1200);
+    const showSoon = () => {
+      if (!isStandalone) setShowPrompt(true);
+    };
 
-      return () => {
-        window.removeEventListener("beforeinstallprompt", onBIP);
-        if (timer) clearTimeout(timer);
-      };
-    }
+    window.addEventListener("beforeinstallprompt", onBIP);
+    timer = setTimeout(showSoon, 1200);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBIP);
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   if (!fontsLoaded) return <LoadingScreen />;
@@ -168,20 +173,32 @@ export default function App() {
   return (
     <LanguageProvider>
       <AppContext.Provider value={{}}>
-        <View style={styles.container}>
-          {/* ✅ CineBridge Landing Page */}
-          <CineBridgeLandingPage />
+        {/* ✅ KEY FIX: use a real web div so the page scrolls and sections render normally */}
+        {Platform.OS === "web" ? (
+          <div
+            style={{
+              minHeight: "100vh",
+              width: "100%",
+              overflowX: "hidden",
+              background: "#000",
+            }}
+          >
+            <CineBridgeLandingPage />
 
-          {Platform.OS === "web" && (
             <InstallPrompt
               visible={showPrompt}
               onClose={() => setShowPrompt(false)}
               deferredEvent={deferredPromptRef.current}
             />
-          )}
-        </View>
 
-        <ExpoStatusBar style="auto" />
+            <ExpoStatusBar style="auto" />
+          </div>
+        ) : (
+          <View style={styles.container}>
+            <CineBridgeLandingPage />
+            <ExpoStatusBar style="auto" />
+          </View>
+        )}
       </AppContext.Provider>
     </LanguageProvider>
   );

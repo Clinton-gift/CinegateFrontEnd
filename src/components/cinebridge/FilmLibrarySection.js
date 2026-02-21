@@ -12,16 +12,19 @@ import goldenRendezvousPoster from "../../../assets/golden-rendezvous.jpg";
 import theMessagePoster from "../../../assets/the-message.jpg";
 import cockADoodlePoster from "../../../assets/cock-a-doodle-doo-mr-chicken.jpg";
 
+// ✅ convert Metro assets to usable web URLs
+import { assetUri } from "../../lib/assetUri"; // <-- adjust if your path differs
+
 export default function FilmLibrarySection() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Popular");
 
   const filters = ["Drama", "Documentary", "Short", "Country", "Popular"];
 
+  // ✅ keep posters as Metro assets, but store raw asset objects here
   const films = [
-    { title: "Congo Killer Gorilla", available: true }, // active clickable (keeps posterImg)
+    { title: "Congo Killer Gorilla", available: true, poster: posterImg },
 
-    // ✅ added 7 posters + titles (not active)
     { title: "The Ultimate Attack", available: false, poster: ultimateAttackPoster },
     { title: "A risk worth taking", available: false, poster: riskWorthTakingPoster },
     { title: "The Mysterious Island", available: false, poster: mysteriousIslandPoster },
@@ -38,10 +41,23 @@ export default function FilmLibrarySection() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return films.filter((f) => (q ? f.title.toLowerCase().includes(q) : true));
-  }, [films, query]);
+  }, [query]); // films is static, no need in deps
 
   // 2 rows only (4 x 2 = 8)
   const visible = filtered.slice(0, 8);
+
+  const uris = useMemo(() => {
+    // ✅ build all URIs once
+    return {
+      bg: assetUri(libraryBg),
+      posters: new Map(
+        films
+          .filter((f) => f.poster)
+          .map((f) => [f.title, assetUri(f.poster)])
+      ),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // films is static
 
   const handleActiveClick = () => {
     // for now, goes nowhere
@@ -49,7 +65,11 @@ export default function FilmLibrarySection() {
 
   return (
     <section className="filmLib" id="film-library">
-      <div className="filmLib__bg" aria-hidden="true" />
+      <div
+        className="filmLib__bg"
+        aria-hidden="true"
+        style={{ backgroundImage: `url(${uris.bg})` }}
+      />
       <div className="filmLib__vignette" aria-hidden="true" />
 
       <div className="filmLib__container">
@@ -96,6 +116,12 @@ export default function FilmLibrarySection() {
             {visible.map((film, idx) => {
               const isActive = film.available && idx === 0;
 
+              // ✅ ALWAYS use URI string on web so images render reliably
+              const posterSrc =
+                film.poster && uris.posters.get(film.title)
+                  ? uris.posters.get(film.title)
+                  : undefined;
+
               return (
                 <div className="filmLib__item" key={`${film.title}-${idx}`}>
                   <button
@@ -107,13 +133,22 @@ export default function FilmLibrarySection() {
                     onClick={isActive ? handleActiveClick : undefined}
                     aria-disabled={!isActive}
                   >
-                    <img
-                      // ✅ active stays posterImg, others use their own posters
-                      src={isActive ? posterImg : film.poster}
-                      alt={film.title}
-                      className="filmLib__posterImg"
-                      draggable={false}
-                    />
+                    {posterSrc ? (
+                      <img
+                        src={posterSrc}
+                        alt={film.title}
+                        className="filmLib__posterImg"
+                        draggable={false}
+                        onError={() =>
+                          console.log("Poster failed:", film.title, posterSrc)
+                        }
+                      />
+                    ) : (
+                      <div
+                        className="filmLib__posterFallback"
+                        aria-label={`${film.title} poster missing`}
+                      />
+                    )}
                   </button>
 
                   <div className="filmLib__filmTitle">{film.title}</div>
@@ -138,7 +173,6 @@ export default function FilmLibrarySection() {
 
         .filmLib__bg{
           position:absolute; inset:0;
-          background-image: url(${libraryBg});
           background-size: cover;
           background-position: center;
           transform: scale(1.02);
@@ -256,7 +290,6 @@ export default function FilmLibrarySection() {
           color: rgba(255,255,255,0.95);
         }
 
-        /* ✅ posters smaller like your image */
         .filmLib__gridWrap{
           width: 100%;
           display: flex;
@@ -264,8 +297,8 @@ export default function FilmLibrarySection() {
         }
 
         .filmLib__grid{
-          --cardW: 160px;  /* ✅ smaller */
-          --cardH: 195px;  /* ✅ smaller */
+          --cardW: 160px;
+          --cardH: 195px;
           display:grid;
           grid-template-columns: repeat(4, var(--cardW));
           gap: 18px;
@@ -289,10 +322,10 @@ export default function FilmLibrarySection() {
         }
         .filmLib__posterBtn.isClickable{ cursor: pointer; }
         .filmLib__posterBtn.isDisabled{
-            cursor: default;
-            opacity: 0.59;              /* more faded */
-            filter: grayscale(1) contrast(0.9) brightness(0.75);  /* more greyed */
-            }
+          cursor: default;
+          opacity: 0.59;
+          filter: grayscale(1) contrast(0.9) brightness(0.75);
+        }
 
         .filmLib__posterBtn.isGlow{
           box-shadow:
@@ -302,13 +335,21 @@ export default function FilmLibrarySection() {
         }
 
         .filmLib__posterImg{
-            width: 100%;
-            height: var(--cardH);
-            object-fit: fill;   /* ✅ show full poster (no cropping) */
-            background: rgba(0,0,0,0.25); /* ✅ fills empty space nicely */
-            display: block;
-            border-radius: 12px;
-            }
+          width: 100%;
+          height: var(--cardH);
+          object-fit: fill;
+          background: rgba(0,0,0,0.25);
+          display: block;
+          border-radius: 12px;
+        }
+
+        .filmLib__posterFallback{
+          width: 100%;
+          height: var(--cardH);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.06);
+          border: 1px dashed rgba(255,165,70,0.25);
+        }
 
         .filmLib__filmTitle{
           margin-top: 8px;

@@ -4,8 +4,8 @@ import whyBg from "../../../assets/why_section_bg.png";
 // ✅ your assets (all inside assets)
 import posterImg from "../../../assets/poster.jpeg";
 import clapperIcon from "../../../assets/clapper_icon.png";
-import clockIcon from "../../../assets/clock.svg";
-import checkIcon from "../../../assets/check.svg";
+import clockIcon from "../../../assets/clock.png";
+import checkIcon from "../../../assets/check.png";
 import shieldIcon from "../../../assets/shield.png";
 import oneIcon from "../../../assets/one.png";
 
@@ -13,6 +13,9 @@ import oneIcon from "../../../assets/one.png";
 import macIcon from "../../../assets/mac.png";
 import videoIcon from "../../../assets/video.png";
 import windowsIcon from "../../../assets/windows.png";
+
+// ✅ convert Metro assets to usable web URLs
+import { assetUri } from "../../lib/assetUri"; // <-- adjust if your path differs
 
 const API_BASE =
   (typeof process !== "undefined" &&
@@ -36,13 +39,14 @@ async function createDemoSession(payload = {}) {
   }
 
   if (!res.ok) {
-    throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
+    throw new Error(
+      data?.error || data?.message || `Request failed (${res.status})`
+    );
   }
   return data;
 }
 
 function triggerDownload(url) {
-  // Use normal navigation so the browser handles it as a file download.
   window.location.assign(url);
 }
 
@@ -53,6 +57,22 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
   const [session, setSession] = useState(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState("");
+
+  // ✅ build URIs once (works on web + keeps your images stable)
+  const uris = useMemo(() => {
+    return {
+      whyBg: assetUri(whyBg),
+      poster: assetUri(posterImg),
+      clapper: assetUri(clapperIcon),
+      clock: assetUri(clockIcon),
+      check: assetUri(checkIcon),
+      shield: assetUri(shieldIcon),
+      one: assetUri(oneIcon),
+      mac: assetUri(macIcon),
+      video: assetUri(videoIcon),
+      windows: assetUri(windowsIcon),
+    };
+  }, []);
 
   useEffect(() => {
     if (!open && downloadOpen) setDownloadOpen(false);
@@ -95,10 +115,8 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
   };
 
   const handleStartDemoDownload = async () => {
-    if (onStartDownload) onStartDownload(); // keep external callback
-    setDownloadOpen(true); // always open download modal
-
-    // Create session once in the background
+    if (onStartDownload) onStartDownload();
+    setDownloadOpen(true);
     await ensureSession();
   };
 
@@ -115,7 +133,8 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
           aria-labelledby="demo-license-title"
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ ...S.panelBg, backgroundImage: `url(${whyBg})` }} />
+          {/* ✅ FIX: backgroundImage must use URL string */}
+          <div style={{ ...S.panelBg, backgroundImage: `url(${uris.whyBg})` }} />
           <div style={S.panelVignette} />
 
           <div style={S.content} className="cg-content">
@@ -127,8 +146,8 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                   Demo Screening License
                 </h3>
                 <p style={S.subtitle} className="cg-subtitle">
-                  This demo film can be screened only once. After playback, access
-                  expires automatically.
+                  This demo film can be screened only once. After playback,
+                  access expires automatically.
                 </p>
               </div>
 
@@ -148,17 +167,25 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
               <div style={S.leftCard} className="cg-left">
                 <div style={S.posterFrame}>
                   <img
-                    src={posterImg}
+                    src={uris.poster}
                     alt="Demo film poster"
                     style={S.posterImg}
                     draggable={false}
+                    onError={() => console.log("Poster failed:", uris.poster)}
                   />
                 </div>
 
                 <div style={S.metaRow}>
                   <span style={S.metaItem}>
                     <span style={S.metaIcon}>
-                      <img src={clockIcon} alt="" style={S.metaIconImg} />
+                      <img
+                        src={uris.clock}
+                        alt=""
+                        style={S.metaIconImg}
+                        onError={() =>
+                          console.log("Clock icon failed:", uris.clock)
+                        }
+                      />
                     </span>
                     <span style={S.timeText}>3 min</span>
                   </span>
@@ -167,7 +194,14 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 <div style={S.metaRow}>
                   <span style={S.metaItem}>
                     <span style={S.metaIcon}>
-                      <img src={checkIcon} alt="" style={S.metaIconImg} />
+                      <img
+                        src={uris.check}
+                        alt=""
+                        style={S.metaIconImg}
+                        onError={() =>
+                          console.log("Check icon failed:", uris.check)
+                        }
+                      />
                     </span>
                     Single-use demo license
                   </span>
@@ -178,7 +212,12 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
               <div style={S.stepsCol} className="cg-right">
                 <div style={S.stepCard} className="cg-step">
                   <div style={S.stepIconCircle}>
-                    <img src={oneIcon} alt="Step 1" style={S.stepIconImg} />
+                    <img
+                      src={uris.one}
+                      alt="Step 1"
+                      style={S.stepIconImg}
+                      onError={() => console.log("Step 1 icon failed:", uris.one)}
+                    />
                   </div>
                   <div>
                     <div style={S.stepTitle} className="cg-step-title">
@@ -193,9 +232,12 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 <div style={S.stepCard} className="cg-step">
                   <div style={S.stepIconBox}>
                     <img
-                      src={shieldIcon}
+                      src={uris.shield}
                       alt="Secure player"
                       style={S.stepIconImg}
+                      onError={() =>
+                        console.log("Shield icon failed:", uris.shield)
+                      }
                     />
                   </div>
                   <div>
@@ -211,9 +253,12 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 <div style={S.stepCard} className="cg-step">
                   <div style={S.stepIconBox}>
                     <img
-                      src={clapperIcon}
+                      src={uris.clapper}
                       alt="Play in player"
                       style={S.stepIconImg}
+                      onError={() =>
+                        console.log("Clapper icon failed:", uris.clapper)
+                      }
                     />
                   </div>
                   <div>
@@ -235,9 +280,14 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 Start Demo Download
               </div>
 
-              {/* small inline status */}
               {sessionError ? (
-                <div style={{ marginBottom: 10, color: "rgba(255,120,120,0.95)", fontWeight: 700 }}>
+                <div
+                  style={{
+                    marginBottom: 10,
+                    color: "rgba(255,120,120,0.95)",
+                    fontWeight: 700,
+                  }}
+                >
                   {sessionError}
                 </div>
               ) : null}
@@ -255,7 +305,9 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
               >
                 <span style={S.ctaTriangle} aria-hidden="true" />
                 <span style={S.ctaLabel}>
-                  {sessionLoading ? "Preparing download..." : "Start Demo Download"}
+                  {sessionLoading
+                    ? "Preparing download..."
+                    : "Start Demo Download"}
                 </span>
               </button>
             </div>
@@ -271,6 +323,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
         ensureSession={ensureSession}
         sessionLoading={sessionLoading}
         sessionError={sessionError}
+        uris={uris}
       />
     </>
   );
@@ -286,10 +339,9 @@ function DemoDownloadOptionsModal({
   ensureSession,
   sessionLoading,
   sessionError,
+  uris,
 }) {
   if (!open) return null;
-
-  const canDownload = !!session && !sessionLoading;
 
   const downloadWithSession = async (which) => {
     const s = session || (await ensureSession());
@@ -313,7 +365,8 @@ function DemoDownloadOptionsModal({
         aria-labelledby="download-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ ...D.panelBg, backgroundImage: `url(${whyBg})` }} />
+        {/* ✅ FIX: backgroundImage must use URL string */}
+        <div style={{ ...D.panelBg, backgroundImage: `url(${uris.whyBg})` }} />
         <div style={D.panelVignette} />
 
         <div style={D.content}>
@@ -338,7 +391,6 @@ function DemoDownloadOptionsModal({
             </button>
           </div>
 
-
           <div style={D.cards}>
             {/* Windows */}
             <button
@@ -352,7 +404,14 @@ function DemoDownloadOptionsModal({
               disabled={sessionLoading}
             >
               <div style={D.cardIconWrap}>
-                <img src={windowsIcon} alt="" style={D.cardIcon} />
+                <img
+                  src={uris.windows}
+                  alt=""
+                  style={D.cardIcon}
+                  onError={() =>
+                    console.log("Windows icon failed:", uris.windows)
+                  }
+                />
               </div>
               <div>
                 <div style={D.cardTitle}>Download CineGate Player (Windows)</div>
@@ -374,7 +433,12 @@ function DemoDownloadOptionsModal({
               disabled={sessionLoading}
             >
               <div style={D.cardIconWrap}>
-                <img src={macIcon} alt="" style={D.cardIcon} />
+                <img
+                  src={uris.mac}
+                  alt=""
+                  style={D.cardIcon}
+                  onError={() => console.log("Mac icon failed:", uris.mac)}
+                />
               </div>
               <div>
                 <div style={D.cardTitle}>Download CineGate Player (Mac)</div>
@@ -396,7 +460,12 @@ function DemoDownloadOptionsModal({
               disabled={sessionLoading}
             >
               <div style={D.cardIconWrap}>
-                <img src={videoIcon} alt="" style={D.cardIcon} />
+                <img
+                  src={uris.video}
+                  alt=""
+                  style={D.cardIcon}
+                  onError={() => console.log("Video icon failed:", uris.video)}
+                />
               </div>
               <div>
                 <div style={D.cardTitle}>Download Demo Film</div>

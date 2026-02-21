@@ -1,16 +1,30 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-// ✅ Update these paths to match your assets folder structure
+// ✅ assets
 import whyBg from "../../../assets/why_section_bg.png";
 import iconClapper from "../../../assets/clapper_icon.png";
 import iconBolt from "../../../assets/bolt_icon.png";
 import iconGlobe from "../../../assets/globe_icon.png";
 
+// ✅ convert Metro assets to usable web URLs
+import { assetUri } from "../../lib/assetUri"; // <-- adjust if your path differs
+
 export default function WhySection({ onOpenDemo }) {
+  // ✅ compute URIs once (fixes “image not loading” on web when using Metro asset objects)
+  const uris = useMemo(
+    () => ({
+      bg: assetUri(whyBg),
+      clapper: assetUri(iconClapper),
+      bolt: assetUri(iconBolt),
+      globe: assetUri(iconGlobe),
+    }),
+    []
+  );
+
   return (
     <section style={S.section} aria-labelledby="why-cine">
       {/* Background */}
-      <div style={{ ...S.bg, backgroundImage: `url(${whyBg})` }} />
+      <div style={{ ...S.bg, backgroundImage: `url(${uris.bg})` }} />
       {/* Vignette overlay */}
       <div style={S.vignette} />
 
@@ -25,7 +39,13 @@ export default function WhySection({ onOpenDemo }) {
           {/* Card 1 */}
           <div style={S.card}>
             <div style={S.cardTopGlow} />
-            <img src={iconClapper} alt="" style={S.cardIcon} />
+            <img
+              src={uris.clapper}
+              alt=""
+              style={S.cardIcon}
+              draggable={false}
+              onError={() => console.log("Icon failed:", "clapper", uris.clapper)}
+            />
 
             <h3 style={S.cardHeading}>
               Public screenings
@@ -51,7 +71,13 @@ export default function WhySection({ onOpenDemo }) {
           {/* Card 2 */}
           <div style={{ ...S.card, ...S.cardHighlight }}>
             <div style={S.cardTopGlow} />
-            <img src={iconBolt} alt="" style={S.cardIcon} />
+            <img
+              src={uris.bolt}
+              alt=""
+              style={S.cardIcon}
+              draggable={false}
+              onError={() => console.log("Icon failed:", "bolt", uris.bolt)}
+            />
 
             <h3 style={S.cardHeading}>
               Pay once.
@@ -77,7 +103,13 @@ export default function WhySection({ onOpenDemo }) {
           {/* Card 3 */}
           <div style={S.card}>
             <div style={S.cardTopGlow} />
-            <img src={iconGlobe} alt="" style={S.cardIcon} />
+            <img
+              src={uris.globe}
+              alt=""
+              style={S.cardIcon}
+              draggable={false}
+              onError={() => console.log("Icon failed:", "globe", uris.globe)}
+            />
 
             <h3 style={S.cardHeading}>
               More African films
@@ -182,7 +214,6 @@ const S = {
     alignItems: "stretch",
   },
 
-  // ✅ Clean transparent card
   card: {
     position: "relative",
     borderRadius: 10,
