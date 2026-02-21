@@ -15,16 +15,51 @@ import cockADoodlePoster from "../../../assets/cock-a-doodle-doo-mr-chicken.jpg"
 // ✅ convert Metro assets to usable web URLs
 import { assetUri } from "../../lib/assetUri"; // <-- adjust if your path differs
 
+// ✅ same logic as your modal
+const API_BASE =
+  typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? "https://api.cinegates.com"
+    : "http://localhost:4010";
+
+async function createDemoSession(payload = {}) {
+  const res = await fetch(`${API_BASE}/api/demo/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      data?.error || data?.message || `Request failed (${res.status})`
+    );
+  }
+  return data;
+}
+
+function triggerDownload(url) {
+  window.location.assign(url);
+}
+
 export default function FilmLibrarySection() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Popular");
 
+  // ✅ download state (so we can show feedback if needed)
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState("");
+
   const filters = ["Drama", "Documentary", "Short", "Country", "Popular"];
 
-  // ✅ keep posters as Metro assets, but store raw asset objects here
   const films = [
     { title: "Congo Killer Gorilla", available: true, poster: posterImg },
-
     { title: "The Ultimate Attack", available: false, poster: ultimateAttackPoster },
     { title: "A risk worth taking", available: false, poster: riskWorthTakingPoster },
     { title: "The Mysterious Island", available: false, poster: mysteriousIslandPoster },
@@ -32,8 +67,6 @@ export default function FilmLibrarySection() {
     { title: "Golden Rendezvous", available: false, poster: goldenRendezvousPoster },
     { title: "The Message", available: false, poster: theMessagePoster },
     { title: "Cock-a-doodle-doo, Mr. Chicken!", available: false, poster: cockADoodlePoster },
-
-    // (your remaining items can stay, they won't show because slice(0, 8))
     { title: "Touki Bouki", available: false },
     { title: "Soleil Ô", available: false },
   ];
@@ -41,13 +74,12 @@ export default function FilmLibrarySection() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return films.filter((f) => (q ? f.title.toLowerCase().includes(q) : true));
-  }, [query]); // films is static, no need in deps
+  }, [query, films]);
 
   // 2 rows only (4 x 2 = 8)
   const visible = filtered.slice(0, 8);
 
   const uris = useMemo(() => {
-    // ✅ build all URIs once
     return {
       bg: assetUri(libraryBg),
       posters: new Map(
@@ -57,10 +89,27 @@ export default function FilmLibrarySection() {
       ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // films is static
+  }, []);
 
-  const handleActiveClick = () => {
-    // for now, goes nowhere
+  // ✅ Clicking the active poster downloads the demo film (same as modal "Download Demo Film")
+  const handleActiveClick = async () => {
+    if (demoLoading) return;
+
+    setDemoError("");
+    setDemoLoading(true);
+
+    try {
+      const session = await createDemoSession({});
+      // expected from your modal usage: session.filmUrl
+      if (!session?.filmUrl) {
+        throw new Error("Missing filmUrl in session response");
+      }
+      triggerDownload(session.filmUrl);
+    } catch (e) {
+      setDemoError(e?.message || "Failed to start demo download");
+    } finally {
+      setDemoLoading(false);
+    }
   };
 
   return (
@@ -78,9 +127,12 @@ export default function FilmLibrarySection() {
           <p className="filmLib__subtitle">
             Licensed African films for one-time public screening.
           </p>
+
+          {/* ✅ Optional inline feedback (only shows if click fails) */}
+          {demoError ? <div className="filmLib__error">{demoError}</div> : null}
         </header>
 
-        {/* centered controls */}
+        {/* Controls */}
         <div className="filmLib__controlsWrap">
           <div className="filmLib__controls">
             <div className="filmLib__search">
@@ -93,14 +145,12 @@ export default function FilmLibrarySection() {
               />
             </div>
 
-            <div className="filmLib__filters">
+            <div className="filmLib__filters" role="tablist" aria-label="Film filters">
               {filters.map((f) => (
                 <button
                   key={f}
                   type="button"
-                  className={
-                    "filmLib__chip " + (activeFilter === f ? "isActive" : "")
-                  }
+                  className={"filmLib__chip " + (activeFilter === f ? "isActive" : "")}
                   onClick={() => setActiveFilter(f)}
                 >
                   {f}
@@ -110,13 +160,12 @@ export default function FilmLibrarySection() {
           </div>
         </div>
 
-        {/* ✅ centered grid */}
+        {/* Grid */}
         <div className="filmLib__gridWrap">
           <div className="filmLib__grid">
             {visible.map((film, idx) => {
               const isActive = film.available && idx === 0;
 
-              // ✅ ALWAYS use URI string on web so images render reliably
               const posterSrc =
                 film.poster && uris.posters.get(film.title)
                   ? uris.posters.get(film.title)
@@ -128,10 +177,19 @@ export default function FilmLibrarySection() {
                     type="button"
                     className={
                       "filmLib__posterBtn " +
-                      (isActive ? "isClickable isGlow" : "isDisabled")
+                      (isActive ? "isClickable isGlow" : "isDisabled") +
+                      (isActive && demoLoading ? " isBusy" : "")
                     }
                     onClick={isActive ? handleActiveClick : undefined}
-                    aria-disabled={!isActive}
+                    aria-disabled={!isActive || demoLoading}
+                    disabled={!isActive || demoLoading}
+                    title={
+                      isActive
+                        ? demoLoading
+                          ? "Preparing download..."
+                          : "Download demo film"
+                        : "Not available"
+                    }
                   >
                     {posterSrc ? (
                       <img
@@ -139,16 +197,17 @@ export default function FilmLibrarySection() {
                         alt={film.title}
                         className="filmLib__posterImg"
                         draggable={false}
-                        onError={() =>
-                          console.log("Poster failed:", film.title, posterSrc)
-                        }
                       />
                     ) : (
-                      <div
-                        className="filmLib__posterFallback"
-                        aria-label={`${film.title} poster missing`}
-                      />
+                      <div className="filmLib__posterFallback" />
                     )}
+
+                    {/* ✅ Small overlay label when active */}
+                    {isActive ? (
+                      <div className="filmLib__badge">
+                        {demoLoading ? "Preparing..." : "Download"}
+                      </div>
+                    ) : null}
                   </button>
 
                   <div className="filmLib__filmTitle">{film.title}</div>
@@ -214,6 +273,18 @@ export default function FilmLibrarySection() {
           text-shadow: 0 10px 30px rgba(0,0,0,0.45);
         }
 
+        .filmLib__error{
+          margin: 10px auto 0;
+          display: inline-block;
+          padding: 8px 12px;
+          border-radius: 10px;
+          background: rgba(140,0,0,0.25);
+          border: 1px solid rgba(255, 120, 120, 0.35);
+          color: rgba(255,160,160,0.95);
+          font-weight: 800;
+        }
+
+        /* ✅ Controls layout */
         .filmLib__controlsWrap{
           width: 100%;
           display: flex;
@@ -223,8 +294,11 @@ export default function FilmLibrarySection() {
         .filmLib__controls{
           display:flex;
           align-items:center;
-          gap: 8px;
+          gap: 10px;
           flex-wrap: nowrap;
+          max-width: 980px;
+          width: 100%;
+          justify-content: center;
         }
 
         .filmLib__search{
@@ -238,6 +312,8 @@ export default function FilmLibrarySection() {
           box-shadow: 0 18px 55px rgba(0,0,0,0.32);
           min-width: 320px;
           height: 42px;
+          flex: 1;
+          max-width: 420px;
         }
         .filmLib__searchIcon{
           position:absolute;
@@ -258,6 +334,7 @@ export default function FilmLibrarySection() {
           line-height: 1;
         }
 
+        /* ✅ Filters - desktop same, mobile becomes scrollable */
         .filmLib__filters{
           display:flex;
           gap: 10px;
@@ -268,6 +345,8 @@ export default function FilmLibrarySection() {
           border: 1px solid rgba(255, 165, 70, 0.22);
           background: rgba(0,0,0,0.22);
           box-shadow: 0 18px 55px rgba(0,0,0,0.26);
+          flex: 0 0 auto;
+          max-width: 520px;
         }
         .filmLib__chip{
           cursor:pointer;
@@ -283,6 +362,7 @@ export default function FilmLibrarySection() {
           font-weight: 700;
           font-size: 14px;
           line-height: 1;
+          white-space: nowrap;
         }
         .filmLib__chip.isActive{
           border-color: rgba(255,165,70,0.72);
@@ -304,9 +384,7 @@ export default function FilmLibrarySection() {
           gap: 18px;
         }
 
-        .filmLib__item{
-          width: var(--cardW);
-        }
+        .filmLib__item{ width: var(--cardW); }
 
         .filmLib__posterBtn{
           width: var(--cardW);
@@ -326,7 +404,6 @@ export default function FilmLibrarySection() {
           opacity: 0.59;
           filter: grayscale(1) contrast(0.9) brightness(0.75);
         }
-
         .filmLib__posterBtn.isGlow{
           box-shadow:
             0 18px 55px rgba(0,0,0,0.40),
@@ -334,10 +411,32 @@ export default function FilmLibrarySection() {
             0 0 34px rgba(255, 140, 0, 0.38);
         }
 
+        .filmLib__posterBtn.isBusy{
+          cursor: progress;
+        }
+        .filmLib__posterBtn.isBusy .filmLib__posterImg{
+          filter: blur(0.3px) brightness(0.92);
+        }
+
+        .filmLib__badge{
+          position: absolute;
+          left: 10px;
+          bottom: 10px;
+          padding: 7px 10px;
+          border-radius: 10px;
+          background: rgba(0,0,0,0.40);
+          border: 1px solid rgba(255, 165, 70, 0.35);
+          color: rgba(255,255,255,0.92);
+          font-weight: 900;
+          font-size: 12px;
+          letter-spacing: 0.4px;
+          text-shadow: 0 10px 22px rgba(0,0,0,0.55);
+        }
+
         .filmLib__posterImg{
           width: 100%;
           height: var(--cardH);
-          object-fit: fill;
+          object-fit: cover;
           background: rgba(0,0,0,0.25);
           display: block;
           border-radius: 12px;
@@ -360,24 +459,65 @@ export default function FilmLibrarySection() {
           padding-left: 2px;
         }
 
-        @media (max-width: 1100px){
-          .filmLib__container{ padding: 0 28px; }
-          .filmLib__controls{ flex-wrap: wrap; justify-content: center; }
-          .filmLib__filters{ width: 100%; justify-content: space-between; }
-          .filmLib__grid{ grid-template-columns: repeat(3, var(--cardW)); }
-        }
-        @media (max-width: 900px){
-          .filmLib__title{ font-size: 38px; }
-          .filmLib__grid{ grid-template-columns: repeat(2, var(--cardW)); }
-        }
-        @media (max-width: 620px){
-          .filmLib__container{ padding: 0 16px; }
-          .filmLib__search{ min-width: 100%; }
+        /* ✅ Responsive */
+       @media (max-width: 620px){
+          .filmLib{
+            padding: 34px 0 18px;
+            align-items: flex-start;
+          }
+
+          .filmLib__container{ padding: 0 14px; }
+
+          .filmLib__title{
+            font-size: 42px;
+          }
+          .filmLib__subtitle{
+            font-size: 16px;
+          }
+
+          .filmLib__controls{
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+          }
+
+          .filmLib__search{
+            min-width: 100%;
+            max-width: none;
+          }
+
+          /* ✅ chips scroll instead of being cut */
+          .filmLib__filters{
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            -webkit-overflow-scrolling: touch;
+          }
+          .filmLib__filters::-webkit-scrollbar{ display:none; }
+
+          /* ✅ 3 posters per row on mobile */
           .filmLib__grid{
-            --cardW: 40vw;
-            --cardH: 120px;
-            grid-template-columns: repeat(2, var(--cardW));
-            gap: 14px;
+            --gap: 10px;
+            --pad: 14px;
+
+            /* 100vw - left pad - right pad - 2 gaps, divided by 3 */
+            --cardW: calc((100vw - (var(--pad) * 2) - (var(--gap) * 2)) / 3);
+            --cardH: 135px;
+
+            grid-template-columns: repeat(3, var(--cardW));
+            gap: var(--gap);
+          }
+
+          /* ✅ smaller, cleaner titles */
+          .filmLib__filmTitle{
+            font-size: 13px;
+            line-height: 1.2;
+            margin-top: 8px;
+            font-weight: 800;
           }
         }
       `}</style>

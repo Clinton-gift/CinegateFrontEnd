@@ -30,65 +30,137 @@ export default function HeroSection({ onOpenDemo }) {
         <View style={styles.vignetteBottom} />
 
         {/* Top bar */}
-        <View style={styles.topBar}>
+        <View
+          style={[
+            styles.topBar,
+            isMobile && {
+              paddingTop: 16,
+              paddingHorizontal: 14,
+            },
+          ]}
+        >
           <Image
             source={require("../../../assets/cinegate_logo.png")}
-            style={styles.logo}
+            style={[styles.logo, isMobile && { width: 170, height: 44 }]}
             resizeMode="contain"
           />
 
-          <TouchableOpacity activeOpacity={0.85} style={styles.langBtn}>
-            <Text style={styles.langIcon}>🌐</Text>
-            <Text style={styles.langText}>English</Text>
-            <Text style={styles.langCaret}>▾</Text>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={[
+              styles.langBtn,
+              isMobile && {
+                paddingVertical: 8,
+                paddingHorizontal: 10,
+                borderRadius: 9,
+              },
+            ]}
+          >
+            <Text style={[styles.langIcon, isMobile && { fontSize: 14 }]}>🌐</Text>
+            <Text style={[styles.langText, isMobile && { fontSize: 14 }]}>English</Text>
+            <Text style={[styles.langCaret, isMobile && { fontSize: 12 }]}>▾</Text>
           </TouchableOpacity>
         </View>
 
         {/* Center content */}
-        <View style={[styles.content, { paddingHorizontal: isMobile ? 18 : 24 }]}>
-          <Text style={[styles.kicker, { fontSize: isMobile ? 18 : 22 }]}>
-            African films. Licensed for public screening.
-          </Text>
+        <View
+          style={[
+            styles.content,
+            {
+              paddingHorizontal: isMobile ? 18 : 24,
 
-          <Text
-            style={[
-              styles.headline,
-              { fontSize: isMobile ? 40 : 56, lineHeight: isMobile ? 46 : 60 },
-            ]}
-          >
-            Pay once. <Text style={styles.headlineAccent}>Screen once.</Text>
-          </Text>
+              // ✅ MOBILE: restore top spacing and add bottom breathing room
+              paddingTop: isMobile ? 110 : 110,
+              paddingBottom: isMobile ? 120 : 90,
 
-          <Text style={[styles.sub, { fontSize: isMobile ? 16 : 18 }]}>
-            Built for cinemas, bars, schools and cultural spaces — not for streaming.
-          </Text>
-
-          {/* ✅ Button like your mockup */}
-          <TouchableOpacity
-            activeOpacity={0.92}
-            onPress={onOpenDemo}
-            style={[styles.ctaShadowWrap, isMobile && { width: "100%", minWidth: undefined }]}
-          >
-            <LinearGradient
-              colors={["#F29B1E", "#E07A15", "#C85E0B"]}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={styles.ctaGradient}
-            >
-              <View style={styles.ctaTopHighlight} />
-
-              <View style={styles.ctaRow}>
-                <Text style={styles.ctaPlay}>▶</Text>
-                <Text style={styles.ctaText}>Download Demo Film</Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.8} onPress={onOpenDemo} style={styles.secondaryLink}>
-            <Text style={styles.secondaryText}>
-              See how the one-time license works <Text style={styles.secondaryArrow}>›</Text>
+              // ✅ MOBILE: let content occupy the hero height so CTA can sit lower
+              justifyContent: isMobile ? "space-between" : "flex-start",
+              flexGrow: isMobile ? 1 : 0,
+            },
+          ]}
+        >
+          {/* Top text block */}
+          <View style={{ alignItems: "center" }}>
+            <Text style={[styles.kicker, { fontSize: isMobile ? 16 : 22 }]}>
+              African films. Licensed for public screening.
             </Text>
-          </TouchableOpacity>
+
+            <Text
+              style={[
+                styles.headline,
+                {
+                  fontSize: isMobile ? 36 : 56,
+                  lineHeight: isMobile ? 42 : 60,
+                  paddingHorizontal: isMobile ? 6 : 0,
+                },
+              ]}
+            >
+              Pay once. <Text style={styles.headlineAccent}>Screen once.</Text>
+            </Text>
+
+            <Text
+              style={[
+                styles.sub,
+                {
+                  fontSize: isMobile ? 15 : 18,
+                  lineHeight: isMobile ? 22 : 26,
+                  paddingHorizontal: isMobile ? 10 : 0,
+                },
+              ]}
+            >
+              Built for cinemas, bars, schools and cultural spaces — not for streaming.
+            </Text>
+          </View>
+
+          {/* CTA block (pushed lower on mobile) */}
+          <View style={{ width: "100%", alignItems: "center", marginTop: isMobile ? 40 : 26 }}>
+            <TouchableOpacity
+              activeOpacity={0.92}
+              onPress={onOpenDemo}
+              style={[
+                styles.ctaShadowWrap,
+                isMobile && {
+                  width: "100%",
+                  minWidth: undefined,
+                  alignSelf: "stretch",
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={["#F29B1E", "#E07A15", "#C85E0B"]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={[
+                  styles.ctaGradient,
+                  isMobile && { paddingVertical: 14, paddingHorizontal: 18 },
+                ]}
+              >
+                <View style={styles.ctaTopHighlight} />
+
+                <View style={styles.ctaRow}>
+                  <Text style={[styles.ctaPlay, isMobile && { fontSize: 22 }]}>▶</Text>
+
+                  <Text
+                    style={[styles.ctaText, isMobile && { fontSize: 22 }]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    Download Demo Film
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={onOpenDemo}
+              style={styles.secondaryLink}
+            >
+              <Text style={[styles.secondaryText, isMobile && { fontSize: 15 }]}>
+                See how the one-time license works <Text style={styles.secondaryArrow}>›</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ImageBackground>
     </View>
@@ -202,9 +274,9 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
 
-  // ✅ CTA button styles (match your screenshot)
+  // ✅ CTA button styles
   ctaShadowWrap: {
-    marginTop: 26,
+    marginTop: 0, // ✅ handled by wrapper View so we can push it down on mobile
     borderRadius: 12,
     shadowColor: "#000",
     shadowOpacity: 0.45,

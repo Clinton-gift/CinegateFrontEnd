@@ -10,7 +10,6 @@ import iconGlobe from "../../../assets/globe_icon.png";
 import { assetUri } from "../../lib/assetUri"; // <-- adjust if your path differs
 
 export default function WhySection({ onOpenDemo }) {
-  // ✅ compute URIs once (fixes “image not loading” on web when using Metro asset objects)
   const uris = useMemo(
     () => ({
       bg: assetUri(whyBg),
@@ -22,32 +21,29 @@ export default function WhySection({ onOpenDemo }) {
   );
 
   return (
-    <section style={S.section} aria-labelledby="why-cine">
+    <section className="whySec" style={S.section} aria-labelledby="why-cine">
       {/* Background */}
-      <div style={{ ...S.bg, backgroundImage: `url(${uris.bg})` }} />
+      <div className="whyBg" style={{ ...S.bg, backgroundImage: `url(${uris.bg})` }} />
       {/* Vignette overlay */}
-      <div style={S.vignette} />
+      <div className="whyVignette" style={S.vignette} />
 
       {/* Content */}
-      <div style={S.inner}>
-        <h2 id="why-cine" style={S.title}>
+      <div className="whyInner" style={S.inner}>
+        <h2 id="why-cine" className="whyTitle" style={S.title}>
           Why CineGate
         </h2>
-        <p style={S.subtitle}>Public film licensing redesigned for African cinema.</p>
 
-        <div style={S.grid}>
+        <p className="whySubtitle" style={S.subtitle}>
+          Public film licensing redesigned for African cinema.
+        </p>
+
+        <div className="whyGrid" style={S.grid}>
           {/* Card 1 */}
-          <div style={S.card}>
+          <div className="whyCard" style={S.card}>
             <div style={S.cardTopGlow} />
-            <img
-              src={uris.clapper}
-              alt=""
-              style={S.cardIcon}
-              draggable={false}
-              onError={() => console.log("Icon failed:", "clapper", uris.clapper)}
-            />
+            <img className="whyIcon" src={uris.clapper} alt="" style={S.cardIcon} draggable={false} />
 
-            <h3 style={S.cardHeading}>
+            <h3 className="whyCardHeading" style={S.cardHeading}>
               Public screenings
               <br />
               are complicated
@@ -56,30 +52,24 @@ export default function WhySection({ onOpenDemo }) {
             <div style={S.rule} />
 
             <ul style={S.list}>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Licensing is unclear
               </li>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Negotiations are slow
               </li>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Many venues screen films informally
               </li>
             </ul>
           </div>
 
           {/* Card 2 */}
-          <div style={{ ...S.card, ...S.cardHighlight }}>
+          <div className="whyCard" style={{ ...S.card, ...S.cardHighlight }}>
             <div style={S.cardTopGlow} />
-            <img
-              src={uris.bolt}
-              alt=""
-              style={S.cardIcon}
-              draggable={false}
-              onError={() => console.log("Icon failed:", "bolt", uris.bolt)}
-            />
+            <img className="whyIcon" src={uris.bolt} alt="" style={S.cardIcon} draggable={false} />
 
-            <h3 style={S.cardHeading}>
+            <h3 className="whyCardHeading" style={S.cardHeading}>
               Pay once.
               <br />
               <span style={S.orange}>Screen once.</span>
@@ -88,30 +78,24 @@ export default function WhySection({ onOpenDemo }) {
             <div style={S.rule} />
 
             <ul style={S.list}>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Download licensed film
               </li>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Screen it one time
               </li>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Access automatically expires
               </li>
             </ul>
           </div>
 
           {/* Card 3 */}
-          <div style={S.card}>
+          <div className="whyCard" style={S.card}>
             <div style={S.cardTopGlow} />
-            <img
-              src={uris.globe}
-              alt=""
-              style={S.cardIcon}
-              draggable={false}
-              onError={() => console.log("Icon failed:", "globe", uris.globe)}
-            />
+            <img className="whyIcon" src={uris.globe} alt="" style={S.cardIcon} draggable={false} />
 
-            <h3 style={S.cardHeading}>
+            <h3 className="whyCardHeading" style={S.cardHeading}>
               More African films
               <br />
               on more screens
@@ -120,34 +104,112 @@ export default function WhySection({ onOpenDemo }) {
             <div style={S.rule} />
 
             <ul style={S.list}>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Legal access for venues
               </li>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Revenue for filmmakers
               </li>
-              <li style={S.li}>
+              <li className="whyLi" style={S.li}>
                 <span style={S.chev}>›</span> Cultural visibility globally
               </li>
             </ul>
           </div>
         </div>
 
-        <div style={S.ctaWrap}>
-          <div style={S.ctaText}>Experience the one-time screening model</div>
+        <div className="whyCtaWrap" style={S.ctaWrap}>
+          {/* ✅ MORE WHITE (your request) */}
+          <div className="whyCtaText" style={S.ctaText}>
+            Experience the one-time screening model
+          </div>
 
           <button
             type="button"
             onClick={onOpenDemo}
+            className="whyCtaBtn"
             style={S.ctaBtn}
             aria-label="Download Demo Film"
           >
-            {/* ✅ NO CIRCLE — triangle only */}
             <span style={S.playTriangle} aria-hidden="true" />
-            <span style={S.ctaLabel}>Download Demo Film</span>
+            <span className="whyCtaLabel" style={S.ctaLabel}>
+              Download Demo Film
+            </span>
           </button>
         </div>
       </div>
+
+      {/* ✅ MOBILE RESPONSIVE FIXES */}
+      <style>{`
+        /* Tablet */
+        @media (max-width: 900px){
+          .whyTitle { font-size: 46px; }
+          .whyGrid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* ✅ Mobile */
+        @media (max-width: 620px){
+          .whySec { padding: 46px 0 56px; }
+
+          .whyInner { padding: 0 16px !important; }
+
+          .whyTitle{
+            font-size: 54px !important;
+            line-height: 1.0 !important;
+          }
+
+          .whySubtitle{
+            font-size: 16px !important;
+            line-height: 1.55 !important;
+            margin-top: 10px !important;
+          }
+
+          /* ✅ Stack cards */
+          .whyGrid{
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+            margin-top: 18px !important;
+          }
+
+          .whyCard{
+            padding: 18px 18px 16px !important;
+            min-height: 0 !important;
+            border-radius: 14px !important;
+          }
+
+          .whyIcon{
+            width: 46px !important;
+            height: 46px !important;
+            margin-bottom: 10px !important;
+          }
+
+          .whyCardHeading{
+            font-size: 22px !important;
+            line-height: 1.18 !important;
+          }
+
+          .whyLi{
+            font-size: 15px !important;
+            line-height: 1.45 !important;
+          }
+
+          /* CTA */
+          .whyCtaWrap{ margin-top: 18px !important; gap: 12px !important; }
+
+          .whyCtaText{
+            font-size: 16px !important;
+          }
+
+          .whyCtaBtn{
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 14px 16px !important;
+            border-radius: 12px !important;
+            font-size: 18px !important;
+          }
+
+          .whyCtaLabel{ white-space: nowrap; }
+        }
+      `}</style>
     </section>
   );
 }
@@ -304,10 +366,12 @@ const S = {
     gap: 14,
   },
 
+  // ✅ UPDATED: brighter white
   ctaText: {
     fontSize: 20,
-    color: "rgba(255,255,255,0.66)",
-    textShadow: "0 8px 30px rgba(0,0,0,0.30)",
+    color: "#fff",
+    fontWeight: 600,
+    textShadow: "0 6px 18px rgba(0,0,0,0.55)",
   },
 
   ctaBtn: {

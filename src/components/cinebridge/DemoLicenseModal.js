@@ -86,7 +86,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
     };
   }, [open, downloadOpen]);
 
-  // Reset session state when modal fully closes (optional, cleaner)
+  // Reset session state when modal fully closes
   useEffect(() => {
     if (!open) {
       setSession(null);
@@ -132,13 +132,13 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
           aria-labelledby="demo-license-title"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ✅ FIX: backgroundImage must use URL string */}
           <div style={{ ...S.panelBg, backgroundImage: `url(${uris.whyBg})` }} />
           <div style={S.panelVignette} />
 
+          {/* ✅ IMPORTANT: this is the scroll container */}
           <div style={S.content} className="cg-content">
             {/* Header */}
-            <div style={S.headerRow}>
+            <div style={S.headerRow} className="cg-header">
               <div />
               <div style={S.headerCenter}>
                 <h3 id="demo-license-title" style={S.title} className="cg-title">
@@ -153,6 +153,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
               <button
                 onClick={onClose}
                 style={S.closeBtn}
+                className="cg-close"
                 aria-label="Close modal"
                 type="button"
               >
@@ -162,29 +163,22 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
 
             {/* Main */}
             <div style={S.main} className="cg-main">
-              {/* Left poster */}
+              {/* Poster card (shows FIRST on mobile now) */}
               <div style={S.leftCard} className="cg-left">
-                <div style={S.posterFrame}>
+                <div style={S.posterFrame} className="cg-poster-frame">
                   <img
                     src={uris.poster}
                     alt="Demo film poster"
                     style={S.posterImg}
+                    className="cg-poster-img"
                     draggable={false}
-                    onError={() => console.log("Poster failed:", uris.poster)}
                   />
                 </div>
 
                 <div style={S.metaRow}>
                   <span style={S.metaItem}>
                     <span style={S.metaIcon}>
-                      <img
-                        src={uris.clock}
-                        alt=""
-                        style={S.metaIconImg}
-                        onError={() =>
-                          console.log("Clock icon failed:", uris.clock)
-                        }
-                      />
+                      <img src={uris.clock} alt="" style={S.metaIconImg} />
                     </span>
                     <span style={S.timeText}>3 min</span>
                   </span>
@@ -193,30 +187,18 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 <div style={S.metaRow}>
                   <span style={S.metaItem}>
                     <span style={S.metaIcon}>
-                      <img
-                        src={uris.check}
-                        alt=""
-                        style={S.metaIconImg}
-                        onError={() =>
-                          console.log("Check icon failed:", uris.check)
-                        }
-                      />
+                      <img src={uris.check} alt="" style={S.metaIconImg} />
                     </span>
                     Single-use demo license
                   </span>
                 </div>
               </div>
 
-              {/* Right steps */}
+              {/* Steps */}
               <div style={S.stepsCol} className="cg-right">
                 <div style={S.stepCard} className="cg-step">
-                  <div style={S.stepIconCircle}>
-                    <img
-                      src={uris.one}
-                      alt="Step 1"
-                      style={S.stepIconImg}
-                      onError={() => console.log("Step 1 icon failed:", uris.one)}
-                    />
+                  <div style={S.stepIconCircle} className="cg-step-icon">
+                    <img src={uris.one} alt="Step 1" style={S.stepIconImg} />
                   </div>
                   <div>
                     <div style={S.stepTitle} className="cg-step-title">
@@ -229,15 +211,8 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 </div>
 
                 <div style={S.stepCard} className="cg-step">
-                  <div style={S.stepIconBox}>
-                    <img
-                      src={uris.shield}
-                      alt="Secure player"
-                      style={S.stepIconImg}
-                      onError={() =>
-                        console.log("Shield icon failed:", uris.shield)
-                      }
-                    />
+                  <div style={S.stepIconBox} className="cg-step-icon">
+                    <img src={uris.shield} alt="Secure player" style={S.stepIconImg} />
                   </div>
                   <div>
                     <div style={S.stepTitle} className="cg-step-title">
@@ -250,15 +225,8 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 </div>
 
                 <div style={S.stepCard} className="cg-step">
-                  <div style={S.stepIconBox}>
-                    <img
-                      src={uris.clapper}
-                      alt="Play in player"
-                      style={S.stepIconImg}
-                      onError={() =>
-                        console.log("Clapper icon failed:", uris.clapper)
-                      }
-                    />
+                  <div style={S.stepIconBox} className="cg-step-icon">
+                    <img src={uris.clapper} alt="Play in player" style={S.stepIconImg} />
                   </div>
                   <div>
                     <div style={S.stepTitle} className="cg-step-title">
@@ -272,7 +240,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
               </div>
             </div>
 
-            {/* Footer CTA */}
+            {/* Footer CTA (inside scroll, so you can reach it) */}
             <div style={S.footer} className="cg-footer">
               <div style={S.footerDivider} />
               <div style={S.footerTitle} className="cg-footer-title">
@@ -304,9 +272,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
               >
                 <span style={S.ctaTriangle} aria-hidden="true" />
                 <span style={S.ctaLabel}>
-                  {sessionLoading
-                    ? "Preparing download..."
-                    : "Start Demo Download"}
+                  {sessionLoading ? "Preparing download..." : "Start Demo Download"}
                 </span>
               </button>
             </div>
@@ -314,7 +280,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
         </div>
       </div>
 
-      {/* ✅ SECOND MODAL */}
+      {/* ✅ SECOND MODAL (no change requested) */}
       <DemoDownloadOptionsModal
         open={downloadOpen}
         onClose={() => setDownloadOpen(false)}
@@ -329,7 +295,7 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
 }
 
 /* ---------------------------
-   SECOND MODAL (same file)
+   SECOND MODAL
 ---------------------------- */
 function DemoDownloadOptionsModal({
   open,
@@ -351,31 +317,27 @@ function DemoDownloadOptionsModal({
     if (which === "film") triggerDownload(s.filmUrl);
   };
 
-  const handleDownloadWindows = () => downloadWithSession("windows");
-  const handleDownloadMac = () => downloadWithSession("mac");
-  const handleDownloadFilm = () => downloadWithSession("film");
-
   return (
     <div style={D.overlay} onClick={onClose} role="presentation">
       <div
         style={D.panel}
+        className="cg-download-panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="download-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ✅ FIX: backgroundImage must use URL string */}
         <div style={{ ...D.panelBg, backgroundImage: `url(${uris.whyBg})` }} />
         <div style={D.panelVignette} />
 
-        <div style={D.content}>
-          <div style={D.headerRow}>
+        <div style={D.content} className="cg-download-content">
+          <div style={D.headerRow} className="cg-download-header">
             <div />
             <div style={D.headerCenter}>
-              <h3 id="download-modal-title" style={D.title}>
+              <h3 id="download-modal-title" style={D.title} className="cg-download-title">
                 Download Required Files
               </h3>
-              <p style={D.subtitle}>
+              <p style={D.subtitle} className="cg-download-subtitle">
                 Download the CineGate Player for your device and the Demo Film.
               </p>
             </div>
@@ -383,6 +345,7 @@ function DemoDownloadOptionsModal({
             <button
               onClick={onClose}
               style={D.closeBtn}
+              className="cg-download-close"
               aria-label="Close modal"
               type="button"
             >
@@ -390,8 +353,7 @@ function DemoDownloadOptionsModal({
             </button>
           </div>
 
-          <div style={D.cards}>
-            {/* Windows */}
+          <div style={D.cards} className="cg-download-cards">
             <button
               type="button"
               style={{
@@ -399,28 +361,23 @@ function DemoDownloadOptionsModal({
                 opacity: sessionLoading ? 0.75 : 1,
                 cursor: sessionLoading ? "progress" : "pointer",
               }}
-              onClick={handleDownloadWindows}
+              onClick={() => downloadWithSession("windows")}
               disabled={sessionLoading}
+              className="cg-download-card"
             >
-              <div style={D.cardIconWrap}>
-                <img
-                  src={uris.windows}
-                  alt=""
-                  style={D.cardIcon}
-                  onError={() =>
-                    console.log("Windows icon failed:", uris.windows)
-                  }
-                />
+              <div style={D.cardIconWrap} className="cg-download-iconwrap">
+                <img src={uris.windows} alt="" style={D.cardIcon} className="cg-download-icon" />
               </div>
               <div>
-                <div style={D.cardTitle}>Download CineGate Player (Windows)</div>
-                <div style={D.cardText}>
+                <div style={D.cardTitle} className="cg-download-card-title">
+                  Download CineGate Player (Windows)
+                </div>
+                <div style={D.cardText} className="cg-download-card-text">
                   Install the secure player required for playback on Windows.
                 </div>
               </div>
             </button>
 
-            {/* Mac */}
             <button
               type="button"
               style={{
@@ -428,26 +385,23 @@ function DemoDownloadOptionsModal({
                 opacity: sessionLoading ? 0.75 : 1,
                 cursor: sessionLoading ? "progress" : "pointer",
               }}
-              onClick={handleDownloadMac}
+              onClick={() => downloadWithSession("mac")}
               disabled={sessionLoading}
+              className="cg-download-card"
             >
-              <div style={D.cardIconWrap}>
-                <img
-                  src={uris.mac}
-                  alt=""
-                  style={D.cardIcon}
-                  onError={() => console.log("Mac icon failed:", uris.mac)}
-                />
+              <div style={D.cardIconWrap} className="cg-download-iconwrap">
+                <img src={uris.mac} alt="" style={D.cardIcon} className="cg-download-icon" />
               </div>
               <div>
-                <div style={D.cardTitle}>Download CineGate Player (Mac)</div>
-                <div style={D.cardText}>
+                <div style={D.cardTitle} className="cg-download-card-title">
+                  Download CineGate Player (Mac)
+                </div>
+                <div style={D.cardText} className="cg-download-card-text">
                   Install the secure player required for playback on macOS.
                 </div>
               </div>
             </button>
 
-            {/* Demo film */}
             <button
               type="button"
               style={{
@@ -455,40 +409,40 @@ function DemoDownloadOptionsModal({
                 opacity: sessionLoading ? 0.75 : 1,
                 cursor: sessionLoading ? "progress" : "pointer",
               }}
-              onClick={handleDownloadFilm}
+              onClick={() => downloadWithSession("film")}
               disabled={sessionLoading}
+              className="cg-download-card"
             >
-              <div style={D.cardIconWrap}>
-                <img
-                  src={uris.video}
-                  alt=""
-                  style={D.cardIcon}
-                  onError={() => console.log("Video icon failed:", uris.video)}
-                />
+              <div style={D.cardIconWrap} className="cg-download-iconwrap">
+                <img src={uris.video} alt="" style={D.cardIcon} className="cg-download-icon" />
               </div>
               <div>
-                <div style={D.cardTitle}>Download Demo Film</div>
-                <div style={D.cardText}>
+                <div style={D.cardTitle} className="cg-download-card-title">
+                  Download Demo Film
+                </div>
+                <div style={D.cardText} className="cg-download-card-text">
                   Download the secure one-time demo film file.
                 </div>
               </div>
             </button>
           </div>
 
-          <div style={D.footerRow}>
+          <div style={D.footerRow} className="cg-download-footer">
             <button type="button" style={D.secondaryBtn} onClick={onClose}>
               Close
             </button>
           </div>
+
+          {sessionError ? (
+            <div style={{ textAlign: "center", color: "rgba(255,120,120,0.95)", fontWeight: 700 }}>
+              {sessionError}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
-
-/* ---------------------------
-   ORIGINAL STYLES (UNCHANGED)
----------------------------- */
 const S = {
   overlay: {
     position: "fixed",
@@ -504,7 +458,7 @@ const S = {
   panel: {
     position: "relative",
     width: "min(820px, calc(100vw - 64px))",
-    height: "min(700px, calc(100vh - 32px))",
+    maxHeight: "92dvh", // ✅ critical: stable on mobile (dynamic viewport)
     borderRadius: 14,
     border: "1px solid rgba(255,170,80,0.32)",
     overflow: "hidden",
@@ -530,15 +484,18 @@ const S = {
     pointerEvents: "none",
   },
 
+  // ✅ This scrolls on mobile + still looks normal on desktop
   content: {
     position: "relative",
     zIndex: 2,
-    height: "100%",
+    maxHeight: "92dvh",
     padding: "22px 28px",
     color: "#fff",
     display: "grid",
-    gridTemplateRows: "auto 1fr auto",
+    gridTemplateRows: "auto auto auto", // ✅ no 1fr trapping on small screens
     rowGap: 14,
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
   },
 
   headerRow: {
@@ -585,7 +542,6 @@ const S = {
     gridTemplateColumns: "300px 1fr",
     gap: 16,
     alignItems: "stretch",
-    minHeight: 0,
   },
 
   leftCard: {
@@ -599,7 +555,6 @@ const S = {
     flexDirection: "column",
     alignItems: "center",
     gap: 10,
-    minHeight: 0,
     boxSizing: "border-box",
   },
 
@@ -662,7 +617,7 @@ const S = {
     WebkitTextStroke: "0.6px rgba(0,0,0,0.35)",
   },
 
-  stepsCol: { display: "grid", gap: 50, minHeight: 0 },
+  stepsCol: { display: "grid", gap: 18 },
 
   stepCard: {
     display: "grid",
@@ -674,7 +629,7 @@ const S = {
     background: "rgba(0,0,0,0.18)",
     backdropFilter: "blur(3px)",
     WebkitBackdropFilter: "blur(3px)",
-    padding: "6px 14px",
+    padding: "10px 14px",
   },
 
   stepIconCircle: {
@@ -744,7 +699,7 @@ const S = {
     padding: "14px 26px",
     minWidth: 420,
     maxWidth: "100%",
-    borderRadius: 6,
+    borderRadius: 10,
     border: "1px solid rgba(255,160,55,0.24)",
     background: "linear-gradient(180deg, #FFAE2B 0%, #CF5A10 100%)",
     boxShadow: "0 10px 22px rgba(0,0,0,0.36)",
@@ -770,7 +725,7 @@ const S = {
 };
 
 /* ---------------------------
-   SECOND MODAL STYLES
+   SECOND MODAL STYLES (unchanged)
 ---------------------------- */
 const D = {
   overlay: {
@@ -787,6 +742,7 @@ const D = {
   panel: {
     position: "relative",
     width: "min(820px, calc(100vw - 64px))",
+    maxHeight: "92dvh",
     borderRadius: 14,
     border: "1px solid rgba(255,170,80,0.32)",
     overflow: "hidden",
@@ -819,6 +775,9 @@ const D = {
     color: "#fff",
     display: "grid",
     rowGap: 16,
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
+    maxHeight: "92dvh",
   },
 
   headerRow: {
@@ -926,24 +885,79 @@ const D = {
 };
 
 const css = `
-  .cg-modal-panel { box-sizing: border-box; }
+  .cg-modal-panel, .cg-download-panel { box-sizing: border-box; }
 
+  /* ✅ Tablet + Mobile: poster stays visible, then scroll down */
   @media (max-width: 980px) {
-    .cg-main { grid-template-columns: 1fr !important; }
-    .cg-left { display: none !important; }
-    .cg-title { font-size: 36px !important; }
-    .cg-subtitle { font-size: 15.5px !important; }
-    .cg-footer-title { font-size: 30px !important; }
+    .cg-main {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 14px !important;
+    }
+
+    /* ✅ DO NOT HIDE poster on mobile */
+    .cg-left { display: flex !important; }
+
+    /* ✅ Make poster fit cleanly on mobile (no weird margins) */
+    .cg-poster-frame {
+      width: 100% !important;
+      margin: 0 !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+    }
+    .cg-poster-img {
+      width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      border-radius: 14px !important;
+      object-fit: cover !important;
+    }
+
+    .cg-title { font-size: 34px !important; }
+    .cg-subtitle { font-size: 15px !important; }
+    .cg-footer-title { font-size: 28px !important; }
     .cg-cta { min-width: 0 !important; width: 100% !important; }
   }
 
-  @media (max-height: 760px) {
-    .cg-content { padding: 16px !important; row-gap: 10px !important; }
-    .cg-title { font-size: 34px !important; }
-    .cg-subtitle { margin-top: 6px !important; font-size: 15px !important; }
-    .cg-step { padding: 10px 14px !important; }
-    .cg-step-title { font-size: 21px !important; }
-    .cg-step-text { font-size: 14.5px !important; margin-top: 2px !important; }
-    .cg-footer-title { font-size: 28px !important; margin-bottom: 8px !important; }
+  /* ✅ Phones: tighter spacing + still scroll */
+  @media (max-width: 520px) {
+    .cg-content {
+      padding: 14px 14px 16px !important;
+      row-gap: 10px !important;
+      max-height: 92dvh !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    .cg-title { font-size: 30px !important; }
+    .cg-subtitle { font-size: 13.5px !important; line-height: 1.35 !important; max-width: 320px !important; }
+
+    .cg-step { padding: 10px 12px !important; }
+    .cg-step-title { font-size: 18px !important; }
+    .cg-step-text { font-size: 13px !important; }
+    .cg-step-icon img { width: 24px !important; height: 24px !important; }
+
+    .cg-footer-title { font-size: 22px !important; margin-bottom: 8px !important; }
+
+    .cg-cta { font-size: 16px !important; padding: 12px 14px !important; border-radius: 12px !important; }
+    .cg-close { width: 38px !important; height: 38px !important; font-size: 20px !important; }
+  }
+
+  /* ✅ Short screens: ensure you can scroll to the CTA */
+  @media (max-height: 740px) {
+    .cg-content { max-height: 92dvh !important; overflow-y: auto !important; }
+  }
+
+  /* ✅ Second modal (leave as-is, but keep mobile safe) */
+  @media (max-width: 520px) {
+    .cg-download-content { padding: 14px 14px 16px !important; row-gap: 12px !important; }
+    .cg-download-title { font-size: 28px !important; }
+    .cg-download-subtitle { font-size: 13.5px !important; line-height: 1.35 !important; max-width: 320px !important; margin-top: 6px !important; }
+    .cg-download-card { grid-template-columns: 46px 1fr !important; padding: 12px !important; gap: 12px !important; }
+    .cg-download-iconwrap { width: 46px !important; height: 46px !important; border-radius: 10px !important; }
+    .cg-download-icon { width: 30px !important; height: 30px !important; }
+    .cg-download-card-title { font-size: 16px !important; }
+    .cg-download-card-text { font-size: 12.8px !important; }
+    .cg-download-close { width: 38px !important; height: 38px !important; font-size: 20px !important; }
   }
 `;
