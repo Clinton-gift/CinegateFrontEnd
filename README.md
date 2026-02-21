@@ -1,5 +1,5 @@
 
-# Taxi Identification (Expo PWA)
+# CineGate (Expo PWA)
 
 Frontend-only prototype for a progressive web app built with Expo (React Native Web).
 Implements:

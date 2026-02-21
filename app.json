@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Taxi Identification",
-    "slug": "taxi-identification",
+    "name": "CineGate",
+    "slug": "cinegate",
     "icon": "./assets/icons/CUY.png",
     "platforms": [
       "ios",
@@ -10,9 +10,9 @@
     ],
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/icons/yellowtaxi.png",
-      "name": "Taxi Identification",
-      "shortName": "Taxi Identification",
+      "favicon": "./assets/icons/vidiconn.png",
+      "name": "CineGate",
+      "shortName": "CineGate",
       "display": "standalone",
       "themeColor": "#024A59",
       "backgroundColor": "#ffffff"

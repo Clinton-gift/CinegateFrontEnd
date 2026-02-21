@@ -1,6 +1,6 @@
 
 /* eslint-disable no-undef */
-const CACHE_NAME = 'Taxi Identification-cache-v1';
+const CACHE_NAME = 'CineGate-cache-v1';
 const APP_SHELL = [
   '/',
   '/index.html',
