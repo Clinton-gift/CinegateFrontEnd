@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import whyBg from "../../../assets/why_section_bg.png";
 
 // ✅ your assets (all inside assets)
@@ -14,8 +14,45 @@ import macIcon from "../../../assets/mac.png";
 import videoIcon from "../../../assets/video.png";
 import windowsIcon from "../../../assets/windows.png";
 
+const API_BASE =
+  (typeof process !== "undefined" &&
+    process.env &&
+    (process.env.REACT_APP_API_URL || process.env.API_URL)) ||
+  "http://localhost:3000";
+
+async function createDemoSession(payload = {}) {
+  const res = await fetch(`${API_BASE}/api/demo/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
+  }
+  return data;
+}
+
+function triggerDownload(url) {
+  // Use normal navigation so the browser handles it as a file download.
+  window.location.assign(url);
+}
+
 export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
   const [downloadOpen, setDownloadOpen] = useState(false);
+
+  // session state
+  const [session, setSession] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState("");
 
   useEffect(() => {
     if (!open && downloadOpen) setDownloadOpen(false);
@@ -30,11 +67,39 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
     };
   }, [open, downloadOpen]);
 
+  // Reset session state when modal fully closes (optional, cleaner)
+  useEffect(() => {
+    if (!open) {
+      setSession(null);
+      setSessionLoading(false);
+      setSessionError("");
+    }
+  }, [open]);
+
   if (!open) return null;
 
-  const handleStartDemoDownload = () => {
+  const ensureSession = async () => {
+    if (session || sessionLoading) return session;
+    setSessionLoading(true);
+    setSessionError("");
+    try {
+      const data = await createDemoSession({});
+      setSession(data);
+      return data;
+    } catch (e) {
+      setSessionError(e?.message || "Failed to create download session");
+      return null;
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
+  const handleStartDemoDownload = async () => {
     if (onStartDownload) onStartDownload(); // keep external callback
     setDownloadOpen(true); // always open download modal
+
+    // Create session once in the background
+    await ensureSession();
   };
 
   return (
@@ -170,14 +235,28 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
                 Start Demo Download
               </div>
 
+              {/* small inline status */}
+              {sessionError ? (
+                <div style={{ marginBottom: 10, color: "rgba(255,120,120,0.95)", fontWeight: 700 }}>
+                  {sessionError}
+                </div>
+              ) : null}
+
               <button
                 type="button"
                 onClick={handleStartDemoDownload}
-                style={S.ctaBtn}
+                style={{
+                  ...S.ctaBtn,
+                  opacity: sessionLoading ? 0.85 : 1,
+                  cursor: sessionLoading ? "progress" : "pointer",
+                }}
                 className="cg-cta"
+                disabled={sessionLoading}
               >
                 <span style={S.ctaTriangle} aria-hidden="true" />
-                <span style={S.ctaLabel}>Start Demo Download</span>
+                <span style={S.ctaLabel}>
+                  {sessionLoading ? "Preparing download..." : "Start Demo Download"}
+                </span>
               </button>
             </div>
           </div>
@@ -188,6 +267,10 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
       <DemoDownloadOptionsModal
         open={downloadOpen}
         onClose={() => setDownloadOpen(false)}
+        session={session}
+        ensureSession={ensureSession}
+        sessionLoading={sessionLoading}
+        sessionError={sessionError}
       />
     </>
   );
@@ -196,20 +279,30 @@ export default function DemoLicenseModal({ open, onClose, onStartDownload }) {
 /* ---------------------------
    SECOND MODAL (same file)
 ---------------------------- */
-function DemoDownloadOptionsModal({ open, onClose }) {
+function DemoDownloadOptionsModal({
+  open,
+  onClose,
+  session,
+  ensureSession,
+  sessionLoading,
+  sessionError,
+}) {
   if (!open) return null;
 
-  const handleDownloadWindows = () => {
-    console.log("Download CineGate Player - Windows");
+  const canDownload = !!session && !sessionLoading;
+
+  const downloadWithSession = async (which) => {
+    const s = session || (await ensureSession());
+    if (!s) return;
+
+    if (which === "windows") triggerDownload(s.playerWinUrl);
+    if (which === "mac") triggerDownload(s.playerMacUrl);
+    if (which === "film") triggerDownload(s.filmUrl);
   };
 
-  const handleDownloadMac = () => {
-    console.log("Download CineGate Player - Mac");
-  };
-
-  const handleDownloadFilm = () => {
-    console.log("Download Demo Film");
-  };
+  const handleDownloadWindows = () => downloadWithSession("windows");
+  const handleDownloadMac = () => downloadWithSession("mac");
+  const handleDownloadFilm = () => downloadWithSession("film");
 
   return (
     <div style={D.overlay} onClick={onClose} role="presentation">
@@ -245,12 +338,18 @@ function DemoDownloadOptionsModal({ open, onClose }) {
             </button>
           </div>
 
+
           <div style={D.cards}>
             {/* Windows */}
             <button
               type="button"
-              style={D.cardBtn}
+              style={{
+                ...D.cardBtn,
+                opacity: sessionLoading ? 0.75 : 1,
+                cursor: sessionLoading ? "progress" : "pointer",
+              }}
               onClick={handleDownloadWindows}
+              disabled={sessionLoading}
             >
               <div style={D.cardIconWrap}>
                 <img src={windowsIcon} alt="" style={D.cardIcon} />
@@ -264,7 +363,16 @@ function DemoDownloadOptionsModal({ open, onClose }) {
             </button>
 
             {/* Mac */}
-            <button type="button" style={D.cardBtn} onClick={handleDownloadMac}>
+            <button
+              type="button"
+              style={{
+                ...D.cardBtn,
+                opacity: sessionLoading ? 0.75 : 1,
+                cursor: sessionLoading ? "progress" : "pointer",
+              }}
+              onClick={handleDownloadMac}
+              disabled={sessionLoading}
+            >
               <div style={D.cardIconWrap}>
                 <img src={macIcon} alt="" style={D.cardIcon} />
               </div>
@@ -279,8 +387,13 @@ function DemoDownloadOptionsModal({ open, onClose }) {
             {/* Demo film */}
             <button
               type="button"
-              style={D.cardBtn}
+              style={{
+                ...D.cardBtn,
+                opacity: sessionLoading ? 0.75 : 1,
+                cursor: sessionLoading ? "progress" : "pointer",
+              }}
               onClick={handleDownloadFilm}
+              disabled={sessionLoading}
             >
               <div style={D.cardIconWrap}>
                 <img src={videoIcon} alt="" style={D.cardIcon} />
