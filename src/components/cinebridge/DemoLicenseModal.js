@@ -18,10 +18,9 @@ import windowsIcon from "../../../assets/windows.png";
 import { assetUri } from "../../lib/assetUri"; // <-- adjust if your path differs
 
 const API_BASE =
-  (typeof process !== "undefined" &&
-    process.env &&
-    (process.env.REACT_APP_API_URL || process.env.API_URL)) ||
-  "http://localhost:3000";
+  typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? "https://api.cinegates.com"
+    : "http://localhost:4010";
 
 async function createDemoSession(payload = {}) {
   const res = await fetch(`${API_BASE}/api/demo/session`, {
